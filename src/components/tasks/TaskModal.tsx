@@ -322,14 +322,17 @@ export const TaskModal = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Assigned To</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select 
+                      onValueChange={(val) => field.onChange(val === "__none__" ? "" : val)} 
+                      value={field.value || "__none__"}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select user" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Unassigned</SelectItem>
+                        <SelectItem value="__none__">Unassigned</SelectItem>
                         {users.map(user => (
                           <SelectItem key={user.id} value={user.id}>
                             {user.full_name || 'Unknown'}
@@ -352,14 +355,17 @@ export const TaskModal = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Lead</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select 
+                        onValueChange={(val) => field.onChange(val === "__none__" ? "" : val)} 
+                        value={field.value || "__none__"}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select lead" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">None</SelectItem>
+                          <SelectItem value="__none__">None</SelectItem>
                           {leads.map(lead => (
                             <SelectItem key={lead.id} value={lead.id}>
                               {lead.lead_name}
@@ -377,14 +383,17 @@ export const TaskModal = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Contact</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select 
+                        onValueChange={(val) => field.onChange(val === "__none__" ? "" : val)} 
+                        value={field.value || "__none__"}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select contact" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">None</SelectItem>
+                          <SelectItem value="__none__">None</SelectItem>
                           {contacts.map(contact => (
                             <SelectItem key={contact.id} value={contact.id}>
                               {contact.contact_name}
@@ -402,14 +411,17 @@ export const TaskModal = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Deal</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select 
+                        onValueChange={(val) => field.onChange(val === "__none__" ? "" : val)} 
+                        value={field.value || "__none__"}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select deal" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">None</SelectItem>
+                          <SelectItem value="__none__">None</SelectItem>
                           {deals.map(deal => (
                             <SelectItem key={deal.id} value={deal.id}>
                               {deal.deal_name}
@@ -427,14 +439,17 @@ export const TaskModal = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Account</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select 
+                        onValueChange={(val) => field.onChange(val === "__none__" ? "" : val)} 
+                        value={field.value || "__none__"}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select account" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">None</SelectItem>
+                          <SelectItem value="__none__">None</SelectItem>
                           {accounts.map(account => (
                             <SelectItem key={account.id} value={account.id}>
                               {account.company_name}
