@@ -7,13 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Search, Video, Trash2, Edit, Calendar, Filter } from "lucide-react";
+import { Plus, Search, Video, Trash2, Edit, Calendar } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MeetingModal } from "@/components/MeetingModal";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-
 interface Meeting {
   id: string;
   subject: string;
@@ -30,10 +29,13 @@ interface Meeting {
   lead_name?: string | null;
   contact_name?: string | null;
 }
-
 const Meetings = () => {
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const {
+    user
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [filteredMeetings, setFilteredMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,27 +47,25 @@ const Meetings = () => {
   const [selectedMeetings, setSelectedMeetings] = useState<string[]>([]);
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
-
   const fetchMeetings = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('meetings')
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from('meetings').select(`
           *,
           leads:lead_id (lead_name),
           contacts:contact_id (contact_name)
-        `)
-        .order('start_time', { ascending: true });
-
+        `).order('start_time', {
+        ascending: true
+      });
       if (error) throw error;
-
       const transformedData = (data || []).map(meeting => ({
         ...meeting,
         lead_name: meeting.leads?.lead_name,
         contact_name: meeting.contacts?.contact_name
       }));
-
       setMeetings(transformedData);
       setSelectedMeetings([]);
     } catch (error) {
@@ -73,51 +73,39 @@ const Meetings = () => {
       toast({
         title: "Error",
         description: "Failed to fetch meetings",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchMeetings();
   }, []);
-
   const getMeetingStatus = (meeting: Meeting): string => {
     if (meeting.status === 'cancelled') return 'cancelled';
     const now = new Date();
     const meetingStart = new Date(meeting.start_time);
     return meetingStart < now ? 'completed' : 'scheduled';
   };
-
   useEffect(() => {
     const filtered = meetings.filter(meeting => {
-      const matchesSearch = 
-        meeting.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        meeting.lead_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        meeting.contact_name?.toLowerCase().includes(searchTerm.toLowerCase());
-      
+      const matchesSearch = meeting.subject?.toLowerCase().includes(searchTerm.toLowerCase()) || meeting.lead_name?.toLowerCase().includes(searchTerm.toLowerCase()) || meeting.contact_name?.toLowerCase().includes(searchTerm.toLowerCase());
       if (statusFilter === "all") return matchesSearch;
-      
       const meetingStatus = getMeetingStatus(meeting);
       return matchesSearch && meetingStatus === statusFilter;
     });
     setFilteredMeetings(filtered);
   }, [meetings, searchTerm, statusFilter]);
-
   const handleDelete = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('meetings')
-        .delete()
-        .eq('id', id);
-
+      const {
+        error
+      } = await supabase.from('meetings').delete().eq('id', id);
       if (error) throw error;
-
       toast({
         title: "Success",
-        description: "Meeting deleted successfully",
+        description: "Meeting deleted successfully"
       });
       fetchMeetings();
     } catch (error) {
@@ -125,23 +113,19 @@ const Meetings = () => {
       toast({
         title: "Error",
         description: "Failed to delete meeting",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const handleBulkDelete = async () => {
     try {
-      const { error } = await supabase
-        .from('meetings')
-        .delete()
-        .in('id', selectedMeetings);
-
+      const {
+        error
+      } = await supabase.from('meetings').delete().in('id', selectedMeetings);
       if (error) throw error;
-
       toast({
         title: "Success",
-        description: `${selectedMeetings.length} meeting(s) deleted successfully`,
+        description: `${selectedMeetings.length} meeting(s) deleted successfully`
       });
       setSelectedMeetings([]);
       fetchMeetings();
@@ -150,11 +134,10 @@ const Meetings = () => {
       toast({
         title: "Error",
         description: "Failed to delete meetings",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       setSelectedMeetings(filteredMeetings.map(m => m.id));
@@ -162,7 +145,6 @@ const Meetings = () => {
       setSelectedMeetings([]);
     }
   };
-
   const handleSelectMeeting = (meetingId: string, checked: boolean) => {
     if (checked) {
       setSelectedMeetings(prev => [...prev, meetingId]);
@@ -170,14 +152,11 @@ const Meetings = () => {
       setSelectedMeetings(prev => prev.filter(id => id !== meetingId));
     }
   };
-
   const isAllSelected = filteredMeetings.length > 0 && selectedMeetings.length === filteredMeetings.length;
   const isSomeSelected = selectedMeetings.length > 0 && selectedMeetings.length < filteredMeetings.length;
-
   const getStatusBadge = (status: string, startTime: string) => {
     const now = new Date();
     const meetingStart = new Date(startTime);
-    
     if (status === 'cancelled') {
       return <Badge variant="destructive">Cancelled</Badge>;
     }
@@ -186,20 +165,15 @@ const Meetings = () => {
     }
     return <Badge variant="default">Scheduled</Badge>;
   };
-
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
+    return <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading meetings...</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
+  return <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Fixed Header */}
       <div className="flex-shrink-0 bg-background">
         <div className="px-6 h-16 flex items-center border-b w-full">
@@ -207,7 +181,10 @@ const Meetings = () => {
             <div className="min-w-0 flex-1">
               <h1 className="text-2xl font-bold text-foreground">Meetings</h1>
             </div>
-            <Button onClick={() => { setEditingMeeting(null); setShowModal(true); }} className="gap-2">
+            <Button onClick={() => {
+            setEditingMeeting(null);
+            setShowModal(true);
+          }} className="gap-2">
               <Plus className="h-4 w-4" />
               New Meeting
             </Button>
@@ -222,17 +199,12 @@ const Meetings = () => {
           <div className="flex items-center gap-4">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search meetings..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+              <Input placeholder="Search meetings..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
             
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[150px]">
-                <Filter className="h-4 w-4 mr-2" />
+                
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -244,22 +216,15 @@ const Meetings = () => {
             </Select>
             
             {/* Bulk Actions */}
-            {selectedMeetings.length > 0 && (
-              <div className="flex items-center gap-2 bg-muted/50 px-4 py-2 rounded-lg">
+            {selectedMeetings.length > 0 && <div className="flex items-center gap-2 bg-muted/50 px-4 py-2 rounded-lg">
                 <span className="text-sm text-muted-foreground">
                   {selectedMeetings.length} selected
                 </span>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setShowBulkDeleteDialog(true)}
-                  className="gap-2"
-                >
+                <Button variant="destructive" size="sm" onClick={() => setShowBulkDeleteDialog(true)} className="gap-2">
                   <Trash2 className="h-4 w-4" />
                   Delete Selected
                 </Button>
-              </div>
-            )}
+              </div>}
           </div>
 
           {/* Table */}
@@ -268,16 +233,11 @@ const Meetings = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[50px]">
-                    <Checkbox
-                      checked={isAllSelected}
-                      ref={(el) => {
-                        if (el) {
-                          (el as any).indeterminate = isSomeSelected;
-                        }
-                      }}
-                      onCheckedChange={handleSelectAll}
-                      aria-label="Select all"
-                    />
+                    <Checkbox checked={isAllSelected} ref={el => {
+                    if (el) {
+                      (el as any).indeterminate = isSomeSelected;
+                    }
+                  }} onCheckedChange={handleSelectAll} aria-label="Select all" />
                   </TableHead>
                   <TableHead>Subject</TableHead>
                   <TableHead>Date & Time</TableHead>
@@ -288,25 +248,14 @@ const Meetings = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredMeetings.length === 0 ? (
-                  <TableRow>
+                {filteredMeetings.length === 0 ? <TableRow>
                     <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
                       No meetings found
                     </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredMeetings.map((meeting) => (
-                    <TableRow 
-                      key={meeting.id}
-                      className={selectedMeetings.includes(meeting.id) ? "bg-muted/50" : ""}
-                    >
+                  </TableRow> : filteredMeetings.map(meeting => <TableRow key={meeting.id} className={selectedMeetings.includes(meeting.id) ? "bg-muted/50" : ""}>
                       <TableCell>
-                        <Checkbox
-                          checked={selectedMeetings.includes(meeting.id)}
-                          onCheckedChange={(checked) => handleSelectMeeting(meeting.id, !!checked)}
-                          aria-label={`Select ${meeting.subject}`}
-                        />
+                        <Checkbox checked={selectedMeetings.includes(meeting.id)} onCheckedChange={checked => handleSelectMeeting(meeting.id, !!checked)} aria-label={`Select ${meeting.subject}`} />
                       </TableCell>
                       <TableCell className="font-medium">{meeting.subject}</TableCell>
                       <TableCell>
@@ -324,47 +273,28 @@ const Meetings = () => {
                       </TableCell>
                       <TableCell>{getStatusBadge(meeting.status, meeting.start_time)}</TableCell>
                       <TableCell>
-                        {meeting.join_url ? (
-                          <a 
-                            href={meeting.join_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline flex items-center gap-1"
-                          >
+                        {meeting.join_url ? <a href={meeting.join_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
                             <Video className="h-4 w-4" />
                             Join
-                          </a>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
+                          </a> : <span className="text-muted-foreground">—</span>}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              setEditingMeeting(meeting);
-                              setShowModal(true);
-                            }}
-                          >
+                          <Button variant="ghost" size="icon" onClick={() => {
+                      setEditingMeeting(meeting);
+                      setShowModal(true);
+                    }}>
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              setMeetingToDelete(meeting.id);
-                              setShowDeleteDialog(true);
-                            }}
-                          >
+                          <Button variant="ghost" size="icon" onClick={() => {
+                      setMeetingToDelete(meeting.id);
+                      setShowDeleteDialog(true);
+                    }}>
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>
                       </TableCell>
-                    </TableRow>
-                  ))
-                )}
+                    </TableRow>)}
               </TableBody>
             </Table>
           </Card>
@@ -372,15 +302,10 @@ const Meetings = () => {
       </div>
 
       {/* Modals */}
-      <MeetingModal
-        open={showModal}
-        onOpenChange={setShowModal}
-        meeting={editingMeeting}
-        onSuccess={() => {
-          fetchMeetings();
-          setEditingMeeting(null);
-        }}
-      />
+      <MeetingModal open={showModal} onOpenChange={setShowModal} meeting={editingMeeting} onSuccess={() => {
+      fetchMeetings();
+      setEditingMeeting(null);
+    }} />
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
@@ -392,14 +317,12 @@ const Meetings = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (meetingToDelete) {
-                  handleDelete(meetingToDelete);
-                  setMeetingToDelete(null);
-                }
-              }}
-            >
+            <AlertDialogAction onClick={() => {
+            if (meetingToDelete) {
+              handleDelete(meetingToDelete);
+              setMeetingToDelete(null);
+            }
+          }}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -417,20 +340,15 @@ const Meetings = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                handleBulkDelete();
-                setShowBulkDeleteDialog(false);
-              }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={() => {
+            handleBulkDelete();
+            setShowBulkDeleteDialog(false);
+          }} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Delete {selectedMeetings.length} Meeting(s)
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
+    </div>;
 };
-
 export default Meetings;
